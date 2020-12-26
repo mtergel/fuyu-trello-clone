@@ -4,28 +4,60 @@ import {
   Flex,
   Heading,
   Icon,
+  Input,
   Menu,
   MenuButton,
-  MenuDivider,
   MenuGroup,
   MenuItem,
   MenuList,
   Spacer,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import { useList } from "../redux/list/useList";
 import { FiMoreVertical } from "react-icons/fi";
+import CreateCard from "./CreateCard";
+import Card from "./Card";
 interface ListProps {
   listId: string;
   index: number;
 }
 
 const List: React.FC<ListProps> = ({ listId, index }) => {
-  const { list, DeleteList } = useList(listId);
+  const { list, DeleteList, ChangeTitle } = useList(listId);
   const handleDelete = () => {
     DeleteList(listId);
   };
+  const [editMode, setEditMode] = useState(false);
+  const toggleEditMode = () => {
+    setEditMode((prevState) => !prevState);
+  };
+
+  const [value, setValue] = useState(list?.title || "");
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value);
+  };
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setEditMode(false);
+        if (value === "") {
+          setValue(list?.title || "");
+        } else {
+          ChangeTitle(listId, value);
+        }
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+
+    //eslint-disable-next-line
+  }, [ref, value]);
+
   if (list) {
     return (
       <Draggable draggableId={list._id} index={index}>
@@ -52,9 +84,21 @@ const List: React.FC<ListProps> = ({ listId, index }) => {
             {...provided.draggableProps}
           >
             <Flex alignItems="center">
-              <Box px={2}>
-                <Heading size="sm">{list.title}</Heading>
-                {/* <Input value={value} onChange={handleChange} border="none" /> */}
+              <Box px={2} width="100%">
+                {!editMode ? (
+                  <Heading size="sm" onClick={toggleEditMode} width="100%">
+                    {list.title}
+                  </Heading>
+                ) : (
+                  <div ref={ref}>
+                    <Input
+                      value={value}
+                      onChange={handleChange}
+                      border="none"
+                      autoFocus
+                    />
+                  </div>
+                )}
               </Box>
               <Spacer />
               <Box color="white">
@@ -64,28 +108,36 @@ const List: React.FC<ListProps> = ({ listId, index }) => {
                   </MenuButton>
                   <MenuList>
                     <MenuGroup title="List Actions">
-                      <MenuItem>Add Card...</MenuItem>
-                      <MenuItem>Copy List...</MenuItem>
-                      <MenuItem>Move List...</MenuItem>
-                      <MenuDivider />
-                      <MenuItem>Delete List...</MenuItem>
+                      <MenuItem onClick={handleDelete}>Delete List...</MenuItem>
                     </MenuGroup>
                   </MenuList>
                 </Menu>
               </Box>
             </Flex>
 
-            {/* <Droppable droppableId={list.id}>
-                {(provided, snapshot) => (
-                  <div ref={provided.innerRef}>
-                    {list.cards &&
-                      list.cards.map((card, index) => (
-                        <CardComponent card={card} index={index} key={card.id} />
-                      ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable> */}
+            <Droppable droppableId={list._id}>
+              {(provided, snapshot) => (
+                <Flex
+                  ref={provided.innerRef}
+                  py={2}
+                  flexDir="column"
+                  alignItems="center"
+                  width="100%"
+                >
+                  {list.cards &&
+                    list.cards.map((card, index) => (
+                      <Card
+                        cardId={card}
+                        listId={listId}
+                        index={index}
+                        key={card}
+                      />
+                    ))}
+                  {provided.placeholder}
+                </Flex>
+              )}
+            </Droppable>
+            <CreateCard listId={listId} />
           </Box>
         )}
       </Draggable>

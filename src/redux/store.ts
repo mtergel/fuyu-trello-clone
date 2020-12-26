@@ -2,9 +2,12 @@ import { combineReducers, createStore } from "@reduxjs/toolkit";
 import throttle from "lodash/throttle";
 import boardSlice from "./board/reducer";
 import listSlice from "./list/reducer";
+import cardSlice from "./cards/reducer";
+import { devToolsEnhancer } from "redux-devtools-extension";
 const rootReducer = combineReducers({
   board: boardSlice,
   listById: listSlice,
+  cardById: cardSlice,
 });
 
 // Todo type here
@@ -30,7 +33,11 @@ const loadState = () => {
 };
 
 const persistedState = loadState();
-export const store = createStore(rootReducer, persistedState);
+export const store = createStore(
+  rootReducer,
+  persistedState,
+  devToolsEnhancer({})
+);
 
 store.subscribe(
   throttle(() => {

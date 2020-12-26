@@ -19,11 +19,13 @@ import {
   Box,
 } from "@chakra-ui/react";
 import React, { useRef, useState } from "react";
-import { useBoard } from "../redux/board/useBoard";
 import FocusLock from "react-focus-lock";
 import { useList } from "../redux/list/useList";
+import { useCard } from "../redux/cards/useCard";
 
-interface CreateListProps {}
+interface CreateCardProps {
+  listId: string;
+}
 
 interface TextInputProps extends InputProps {
   label: string;
@@ -50,9 +52,10 @@ const TextInput = React.forwardRef(
 interface FormProps {
   firstFieldRef: React.MutableRefObject<HTMLInputElement | null>;
   onCancel: () => void;
-  onSubmit: (listTitle: string) => void;
+  onSubmit: (cardTitle: string) => void;
+  listId: string;
 }
-const Form = ({ firstFieldRef, onCancel, onSubmit }: FormProps) => {
+const Form = ({ firstFieldRef, onCancel, onSubmit, listId }: FormProps) => {
   const [value, setValue] = useState("");
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) =>
     setValue(event.target.value);
@@ -64,8 +67,8 @@ const Form = ({ firstFieldRef, onCancel, onSubmit }: FormProps) => {
   return (
     <Stack spacing={4}>
       <TextInput
-        label="List title"
-        id="list-title"
+        label="Card title"
+        id={`card-title-${listId}`}
         ref={firstFieldRef}
         value={value}
         onChange={handleChange}
@@ -83,9 +86,12 @@ const Form = ({ firstFieldRef, onCancel, onSubmit }: FormProps) => {
   );
 };
 
-const CreateList: React.FC<CreateListProps> = () => {
-  const { board } = useBoard();
-  const { AddList } = useList(null);
+const CreateCard: React.FC<CreateCardProps> = ({ listId }) => {
+  const { AddCard } = useCard(null, listId);
+  const handleCard = (cardTitle: string) => {
+    AddCard(listId, cardTitle);
+  };
+  const { list } = useList(listId);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
@@ -103,8 +109,7 @@ const CreateList: React.FC<CreateListProps> = () => {
             boxSizing="border-box"
             verticalAlign="top"
             rounded="md"
-            width="272px"
-            backgroundColor="rgba(26, 32, 44, 0.7)"
+            width="100%"
             borderRadius={3}
             py={2}
             px={4}
@@ -112,7 +117,6 @@ const CreateList: React.FC<CreateListProps> = () => {
             flexDir="column"
             maxHeight="100%"
             position="relative"
-            boxShadow="lg"
             color="white"
           >
             <Flex
@@ -125,7 +129,9 @@ const CreateList: React.FC<CreateListProps> = () => {
                 <AddIcon />
               </Icon>
               <Text>
-                {board.lists.length > 0 ? "Add another list" : "Add new list"}
+                {list && list.cards && list.cards.length > 0
+                  ? "Add another card"
+                  : "Add new card"}
               </Text>
             </Flex>
           </Box>
@@ -137,7 +143,8 @@ const CreateList: React.FC<CreateListProps> = () => {
             <Form
               firstFieldRef={firstFieldRef}
               onCancel={onClose}
-              onSubmit={AddList}
+              onSubmit={handleCard}
+              listId={listId}
             />
           </FocusLock>
         </PopoverContent>
@@ -145,4 +152,4 @@ const CreateList: React.FC<CreateListProps> = () => {
     </Box>
   );
 };
-export default CreateList;
+export default CreateCard;

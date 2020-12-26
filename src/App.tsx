@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { useBoard } from "./redux/board/useBoard";
 import List from "./components/List";
-import { useList } from "./redux/list/useList";
 import Layout from "./layout/Layout";
-import { Box, Flex, Heading, IconButton, Stack } from "@chakra-ui/react";
+import { Flex, Heading, IconButton, Stack } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
 import EditBoard from "./components/EditBoard";
 import {
@@ -13,24 +12,35 @@ import {
   ResponderProvided,
 } from "react-beautiful-dnd";
 import CreateList from "./components/CreateList";
+import { useList } from "./redux/list/useList";
 interface AppProps {}
 
 const App: React.FC<AppProps> = () => {
   const { board, MoveList } = useBoard();
-  const { AddList } = useList(null);
+  const { MoveCard } = useList(null);
   // todo
   const handleMovelist = (result: DropResult, provided: ResponderProvided) => {
     // column e.g list
     if (!result.destination) return;
-
+    console.log(result);
     if (result.type === "COLUMN") {
       if (result.source.index !== result.destination.index) {
         MoveList(result.source.index, result.destination?.index);
       }
+      // card
+    } else {
+      if (
+        result.source.index !== result.destination.index ||
+        result.source.droppableId !== result.destination.droppableId
+      ) {
+        MoveCard(
+          result.source.index,
+          result.destination.index,
+          result.source.droppableId,
+          result.destination.droppableId
+        );
+      }
     }
-  };
-  const addListWithName = (title: string) => {
-    AddList(title);
   };
 
   const [editState, setEditState] = useState(false);
@@ -77,30 +87,34 @@ const App: React.FC<AppProps> = () => {
             )}
           </Flex>
         </Stack>
-        <Box
-          px={[4, 16, 32]}
-          background="linear-gradient(180deg,rgba(0,0,0,.48) 0,rgba(0,0,0,.24) 48px,transparent 100%,transparent)"
-          flexGrow={1}
-          height={"100%"}
-        >
-          <DragDropContext onDragEnd={handleMovelist}>
-            <Droppable
-              droppableId={`board-${board.title}`}
-              direction="horizontal"
-              type="COLUMN"
-            >
-              {(provided, snapshot) => (
-                <Flex overflowX="auto" ref={provided.innerRef} py={6}>
-                  {board.lists.map((listId, index) => (
-                    <List listId={listId} key={listId} index={index} />
-                  ))}
-                  {provided.placeholder}
-                  <CreateList />
-                </Flex>
-              )}
-            </Droppable>
-          </DragDropContext>
-        </Box>
+
+        <DragDropContext onDragEnd={handleMovelist}>
+          <Droppable
+            droppableId={`board-${board.title}`}
+            direction="horizontal"
+            type="COLUMN"
+          >
+            {(provided, snapshot) => (
+              <Flex
+                overflowX="auto"
+                ref={provided.innerRef}
+                py={6}
+                px={[4, 16, 32]}
+                background="linear-gradient(180deg,rgba(0,0,0,.48) 0,rgba(0,0,0,.24) 48px,transparent 100%,transparent)"
+                flexGrow={1}
+                display="flex"
+                alignItems="flex-start"
+                justifyContent="flex-start"
+              >
+                {board.lists.map((listId, index) => (
+                  <List listId={listId} key={listId} index={index} />
+                ))}
+                {provided.placeholder}
+                <CreateList />
+              </Flex>
+            )}
+          </Droppable>
+        </DragDropContext>
       </Flex>
     </Layout>
   );
