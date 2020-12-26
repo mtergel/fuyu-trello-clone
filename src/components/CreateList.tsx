@@ -62,24 +62,31 @@ const Form = ({ firstFieldRef, onCancel, onSubmit }: FormProps) => {
   };
 
   return (
-    <Stack spacing={4}>
-      <TextInput
-        label="List title"
-        id="list-title"
-        ref={firstFieldRef}
-        value={value}
-        onChange={handleChange}
-        autoComplete="off"
-      />
-      <ButtonGroup d="flex" justifyContent="flex-end">
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button colorScheme="green" onClick={handleSubmit}>
-          Add
-        </Button>
-      </ButtonGroup>
-    </Stack>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit();
+      }}
+    >
+      <Stack spacing={4}>
+        <TextInput
+          label="List title"
+          id="list-title"
+          ref={firstFieldRef}
+          value={value}
+          onChange={handleChange}
+          autoComplete="off"
+        />
+        <ButtonGroup d="flex" justifyContent="flex-end">
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button colorScheme="green" type="submit">
+            Add
+          </Button>
+        </ButtonGroup>
+      </Stack>
+    </form>
   );
 };
 

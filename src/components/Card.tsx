@@ -1,4 +1,5 @@
-import { Box, Text } from "@chakra-ui/react";
+import { DeleteIcon } from "@chakra-ui/icons";
+import { Box, Flex, IconButton, Text } from "@chakra-ui/react";
 import React from "react";
 import { Draggable } from "react-beautiful-dnd";
 import { useCard } from "../redux/cards/useCard";
@@ -10,7 +11,7 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ cardId, listId, index }) => {
-  const { card } = useCard(cardId, listId);
+  const { card, DeleteCard } = useCard(cardId, listId);
   if (card) {
     return (
       <Draggable draggableId={card._id} index={index}>
@@ -35,7 +36,15 @@ const Card: React.FC<CardProps> = ({ cardId, listId, index }) => {
             {...provided.dragHandleProps}
             {...provided.draggableProps}
           >
-            <Text>{card.title}</Text>
+            <Flex alignItems="center">
+              <Text flexGrow={1}>{card.title}</Text>
+              <IconButton
+                onClick={() => DeleteCard(listId, cardId)}
+                aria-label="Delete card"
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Flex>
           </Box>
         )}
       </Draggable>

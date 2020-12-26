@@ -18,6 +18,7 @@ import { useList } from "../redux/list/useList";
 import { FiMoreVertical } from "react-icons/fi";
 import CreateCard from "./CreateCard";
 import Card from "./Card";
+import { useCard } from "../redux/cards/useCard";
 interface ListProps {
   listId: string;
   index: number;
@@ -25,7 +26,11 @@ interface ListProps {
 
 const List: React.FC<ListProps> = ({ listId, index }) => {
   const { list, DeleteList, ChangeTitle } = useList(listId);
+  const { DeleteBatchCards } = useCard(null, listId);
   const handleDelete = () => {
+    if (list && list.cards) {
+      DeleteBatchCards(list.cards);
+    }
     DeleteList(listId);
   };
   const [editMode, setEditMode] = useState(false);

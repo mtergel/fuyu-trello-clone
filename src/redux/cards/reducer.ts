@@ -1,5 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
+import { stringify } from "querystring";
+import { start } from "repl";
 
 export interface Card {
   _id: string;
@@ -41,11 +43,53 @@ const cardSlice = createSlice({
         };
       },
     },
+    deleteCard: {
+      reducer: (
+        state,
+        action: PayloadAction<{
+          cardId: string;
+        }>
+      ) => {
+        return {
+          ..._.omit(state, action.payload.cardId),
+        };
+      },
+      prepare: (cardId: string) => {
+        return {
+          payload: {
+            cardId,
+          },
+        };
+      },
+    },
+    deleteCardsFromList: {
+      reducer: (
+        state,
+        action: PayloadAction<{
+          cardIds: string[];
+        }>
+      ) => {
+        const newObj = Object.keys(state)
+          .filter((cardId) => !action.payload.cardIds.includes(cardId))
+          .reduce(
+            (newState, cardId) => ({ ...newState, [cardId]: state[cardId] }),
+            {}
+          );
+        return newObj;
+      },
+      prepare: (cardIds: string[]) => {
+        return {
+          payload: {
+            cardIds,
+          },
+        };
+      },
+    },
   },
 });
 
 // export actions
-export const { addCard } = cardSlice.actions;
+export const { addCard, deleteCard, deleteCardsFromList } = cardSlice.actions;
 
 // export reducer
 export default cardSlice.reducer;
