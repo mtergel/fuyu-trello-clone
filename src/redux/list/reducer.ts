@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
-import { stringify } from "querystring";
 
 export interface List {
   _id: string;

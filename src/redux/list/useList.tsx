@@ -10,7 +10,6 @@ import {
 } from "./reducer";
 import { nanoid } from "@reduxjs/toolkit";
 import { useBoard } from "../board/useBoard";
-import { useCard } from "../cards/useCard";
 
 export const useList = (listId: string | null) => {
   const listById = useSelector((state: AppState) => state.listById);
